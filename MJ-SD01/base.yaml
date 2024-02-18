@@ -1,0 +1,476 @@
+esphome:
+  name: $name
+  on_loop:
+    then:
+      - lambda: |-
+          if (id(dimmer_action) == 0) return;
+          uint32_t now = millis();
+          uint32_t next_tick = id(dimmer_next_tick);
+          if (next_tick > now) return;
+          if (   (id(dimmer_action) > 0 && id(dimmer_value) == 255)
+              || (id(dimmer_action) < 0 && id(dimmer_value) == 1)) {
+            id(dimmer_action) = 0;
+            return;
+          }
+
+          double new_bri = id(dimmer_value_float);
+          uint8_t next_level = id(dimmer_value);
+          while (next_tick <= now) {
+            if (id(dimmer_action) == 1 && next_level < 255) {
+              next_level += 1;
+            }
+            if (id(dimmer_action) == -1 && next_level > 1) {
+              next_level -= 1;
+            }
+
+            double next_level_dbl = (double) next_level;
+            new_bri = next_level_dbl / 255.0;
+            
+            auto tick_increment = (1000 / id(dimming_speed));
+            next_tick += tick_increment;
+          }
+
+          id(dimmer_next_tick) = next_tick;
+          auto call = id($device_id).turn_on();
+          call.set_brightness(new_bri);
+          call.perform();
+
+esp8266:
+  board: esp01_1m
+  restore_from_flash: true
+
+wifi:
+  ssid: $wifi_ssid
+  password: $wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "$fallback_ssid"
+    password: "JbP6CAWsWCnr"
+
+logger:
+  level: $log_level
+
+api:
+
+ota:
+  password: "90a781b68f1c3f1536d09aad5af04158"
+
+captive_portal:
+
+web_server:
+  port: 80
+  include_internal: true
+
+button:
+  - platform: restart
+    name: Restart $friendly_name
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: $friendly_name IP Address
+      icon: mdi:ip-network
+
+globals:
+  - id: dimmer_value
+    type: uint8_t
+  - id: dimmer_value_float
+    type: double
+  - id: last_on_dimmer_value
+    type: uint8_t
+  - id: dimmer_action
+    type: int
+  - id: dimming_speed
+    type: uint8_t
+    initial_value: "85"
+  - id: lo_preset
+    type: uint8_t
+    initial_value: "60"
+  - id: hi_preset
+    type: uint8_t
+    initial_value: "255"
+  - id: on_transition_time
+    type: uint16_t
+    initial_value: "3"
+  - id: off_transition_time
+    type: uint16_t
+    initial_value: "10"
+  - id: status_led_brightness
+    type: double
+    initial_value: "0.1"
+  - id: dimmer_next_tick
+    type: uint32_t
+  - id: light_turning_off
+    type: bool
+    initial_value: "false"
+
+number:
+  - platform: template
+    name: "${friendly_name} Dimmer Value"
+    entity_category: diagnostic
+    icon: mdi:lightbulb-on-50
+    optimistic: true
+    restore_value: true
+    min_value: 1
+    max_value: 255
+    step: 1
+    mode: box
+    set_action:
+      then: 
+        - globals.set:
+            id: dimmer_value
+            value: !lambda return x;            
+  - platform: template
+    name: "${friendly_name} Dimming speed"
+    entity_category: config
+    icon: mdi:speedometer
+    optimistic: true
+    restore_value: true
+    min_value: 0
+    max_value: 255
+    step: 1
+    set_action:
+      then: 
+        - globals.set:
+            id: dimming_speed
+            value: !lambda return x;
+  - platform: template
+    name: "${friendly_name} Low preset"
+    entity_category: config
+    icon: mdi:brightness-6
+    optimistic: true
+    restore_value: true
+    min_value: 1
+    max_value: 255
+    step: 1
+    set_action:
+      then: 
+        - globals.set:
+            id: lo_preset
+            value: !lambda return x;
+  - platform: template
+    name: "${friendly_name} High preset"
+    entity_category: config
+    icon: mdi:brightness-7
+    optimistic: true
+    restore_value: true
+    initial_value: 255
+    min_value: 1
+    max_value: 255
+    step: 1
+    set_action:
+      then: 
+        - globals.set:
+            id: hi_preset
+            value: !lambda return x;
+  - platform: template
+    name: "${friendly_name} On transition time"
+    entity_category: config
+    icon: mdi:arrow-right-top
+    optimistic: true
+    restore_value: true
+    min_value: 0
+    max_value: 65535
+    step: 1
+    mode: box
+    set_action:
+      then: 
+        - globals.set:
+            id: on_transition_time
+            value: !lambda return x;
+  - platform: template
+    name: "${friendly_name} Off transition time"
+    entity_category: config
+    icon: mdi:arrow-right-bottom
+    optimistic: true
+    restore_value: true
+    min_value: 0
+    max_value: 65535
+    step: 1
+    mode: box
+    set_action:
+      then: 
+        - globals.set:
+            id: off_transition_time
+            value: !lambda return x;
+
+  - platform: template
+    name: "${friendly_name} Saved brightness"
+    id: saved_brightness
+    entity_category: diagnostic
+    icon: mdi:arrow-right-bottom
+    optimistic: true
+    restore_value: true
+    min_value: 1
+    max_value: 255
+    step: 1
+    mode: box
+    set_action:
+      then: 
+        - globals.set:
+            id: last_on_dimmer_value
+            value: !lambda return x;            
+
+  - platform: template
+    name: "${friendly_name} Status LED brightness"
+    entity_category: config
+    icon: mdi:led-variant-outline
+    optimistic: true
+    restore_value: true
+    min_value: 0
+    max_value: 1
+    step: 0.01
+    set_action:
+      then: 
+        - globals.set:
+            id: status_led_brightness
+            value: !lambda return x;
+        - light.turn_on:
+            id: red_status_led
+            brightness: !lambda return x;
+            transition_length: 250ms
+output:
+  - id: led5
+    pin: GPIO3
+    platform: esp8266_pwm
+    inverted: true
+
+  - id: led4
+    pin: GPIO5
+    platform: esp8266_pwm
+    inverted: true
+
+  - id: led3
+    pin: GPIO12
+    platform: esp8266_pwm
+    inverted: true
+
+  - id: led2
+    pin: GPIO14
+    platform: esp8266_pwm
+    inverted: true
+
+  - id: phys_pwm
+    pin: GPIO13
+    platform: esp8266_pwm
+    power_supply: relay
+    frequency: 300 Hz
+    min_power: ${pwm_min_power}
+
+  - id: red_led
+    pin: GPIO4
+    platform: esp8266_pwm
+    inverted: true
+
+  - id: brtleds_output
+    platform: template
+    type: float
+    power_supply: relay
+    write_action:
+      - globals.set:
+          id: dimmer_value_float
+          value: !lambda return(state);
+      - output.set_level:
+          id: red_led
+          level: !lambda "return(state == 0.0f ? 0.5 : 0.0f);"
+      - output.set_level:
+          id: led2
+          level: !lambda return(state * 5 - 1);
+      - output.set_level:
+          id: led3
+          level: !lambda return(state * 5 - 2);
+      - output.set_level:
+          id: led4
+          level: !lambda return(state * 5 - 3);
+      - output.set_level:
+          id: led5
+          level: !lambda return(state * 5 - 4);
+
+  - id: combined_output
+    platform: template
+    type: float
+    write_action:
+      - lambda: |-
+          id(dimmer_value) = uint8_t(state * 255);
+      - output.set_level:
+          id: brtleds_output
+          level: !lambda return(state);
+      - output.set_level:
+          id: phys_pwm
+          level: !lambda return(gamma_correct(state, ${gamma_correct}));
+
+light:
+  - id: $device_id
+    name: $friendly_name
+    platform: monochromatic
+    output: combined_output
+    gamma_correct: "1.0"
+    default_transition_length: 0s
+    on_state:
+      - lambda: |-
+          auto light_values = id($device_id).remote_values;
+          uint8_t brightness = uint8_t(light_values.get_brightness() * 255);
+          if (brightness == 0) return;
+          id(saved_brightness).make_call().set_value(brightness).perform();
+    on_turn_on:
+      - light.turn_off:
+          id: red_status_led
+          transition_length: 250ms
+    on_turn_off:
+      - light.turn_on:
+          id: red_status_led
+          brightness: !lambda return id(status_led_brightness);
+          transition_length: 250ms
+  - id: brightness_led
+    internal: true
+    platform: monochromatic
+    output: brtleds_output
+    gamma_correct: 1.0
+    default_transition_length: 0s
+    entity_category: config
+  # - id: binary_red_status_led
+  #   internal: true
+  #   platform: status_led
+  #   pin:
+  #     number: GPIO4
+  #     inverted: true
+  - id: red_status_led
+    internal: true
+    platform: monochromatic
+    output: red_led
+    entity_category: config
+    gamma_correct: 1.0
+    effects:
+      - pulse:
+          name: Pulse Slow
+          transition_length: 1s
+          update_interval: 1s
+      - pulse:
+          name: Pulse Fast
+          transition_length: 250ms
+          update_interval: 250ms
+
+power_supply:
+  - id: relay
+    pin:
+      number: GPIO16
+      inverted: true
+    enable_time: 0s
+    keep_on_time: 0s
+
+binary_sensor:
+  - platform: status
+    name: ${friendly_name} Status
+  - id: up_button
+    name: ${friendly_name} Up Button
+    platform: gpio
+    pin:
+      number: GPIO0
+      inverted: true
+      mode: INPUT_PULLUP
+    internal: true
+    on_press:
+      then:
+        - if:
+            condition:
+              lambda: 'return id(dimmer_value) == 0;'
+            then:
+              - light.turn_on:
+                  id: $device_id
+                  transition_length: !lambda |-
+                    return(id(on_transition_time) * 100);
+                  brightness: !lambda |-
+                    return(((double)id(hi_preset)) / 255.0);
+            else:
+              - globals.set:
+                  id: dimmer_action
+                  value: "1"
+              - globals.set:
+                  id: dimmer_next_tick
+                  value: !lambda 'return(millis());'
+    on_release:
+      then:
+        - globals.set:
+            id: dimmer_action
+            value: "0"
+        - globals.set:
+            id: dimmer_next_tick
+            value: "0"
+  - id: down_button
+    name: ${friendly_name} Down Button
+    platform: gpio
+    pin:
+      number: GPIO1
+      inverted: true
+      mode: INPUT_PULLUP
+    internal: true
+    on_press:
+      then:
+        - if:
+            condition:
+              lambda: 'return id(dimmer_value) == 0;'
+            then:
+              - light.turn_on:
+                  id: $device_id
+                  transition_length: !lambda |-
+                    return(id(on_transition_time) * 100);
+                  brightness: !lambda |-
+                    return(((double)id(lo_preset)) / 255.0);
+            else:
+              - globals.set:
+                  id: dimmer_action
+                  value: "-1"
+              - globals.set:
+                  id: dimmer_next_tick
+                  value: !lambda |-
+                    return(millis());
+    on_release:
+      then:
+        - globals.set:
+            id: dimmer_action
+            value: "0"
+        - globals.set:
+            id: dimmer_next_tick
+            value: "0"
+  - id: main_button
+    name: ${friendly_name} Main Button
+    platform: gpio
+    pin:
+      number: GPIO15
+      mode: INPUT_PULLUP
+    internal: true
+    on_release:
+      then:
+        - if:
+            condition:
+              light.is_on: $device_id
+            then:
+              light.turn_off:
+                id: $device_id
+                transition_length: !lambda |-
+                  return id(off_transition_time) * 100;
+            else:
+              light.turn_on:
+                id: $device_id
+                transition_length: !lambda |-
+                  return id(on_transition_time) * 100;
+                brightness: !lambda |-
+                  return double(id(last_on_dimmer_value)) / 255.0;
+        - lambda: |-
+            return;
+            if (id(dimmer_value) == 0) {
+              auto turn_on = id($device_id).turn_on();
+              turn_on.set_transition_length(id(on_transition_time) * 100);
+              turn_on.set_brightness(double(id(last_on_dimmer_value)) / 255.0);
+              turn_on.perform();
+            } else {
+              auto turn_off = id($device_id).turn_off();
+              turn_off.set_transition_length(id(off_transition_time) * 100);
+              turn_off.perform();
+            }
+sensor:
+  - platform: uptime
+    name: ${friendly_name} Uptime
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal
