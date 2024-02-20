@@ -114,23 +114,18 @@ sensor:
 
 output:
   - platform: gpio
-    name: "LED 1"
     pin: 6
     id: led1
   - platform: gpio
-    name: "LED 2"
     pin: 7
     id: led2
   - platform: gpio
-    name: "LED 3"
     pin: 8
     id: led3
   - platform: gpio
-    name: "LED 4"
     pin: 9
     id: led4
   - platform: gpio
-    name: "LED 5"
     pin: 24
     id: led5
 
