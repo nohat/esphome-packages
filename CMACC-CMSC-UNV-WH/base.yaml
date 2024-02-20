@@ -112,10 +112,47 @@ sensor:
   - platform: wifi_signal
     name: ${friendly_name} WiFi Signal
 
+output:
+  - platform: gpio
+    name: "LED 1"
+    pin: 6
+    id: led1
+  - platform: gpio
+    name: "LED 2"
+    pin: 7
+    id: led2
+  - platform: gpio
+    name: "LED 3"
+    pin: 8
+    id: led3
+  - platform: gpio
+    name: "LED 4"
+    pin: 9
+    id: led4
+  - platform: gpio
+    name: "LED 5"
+    pin: 24
+    id: led5
+
 light:
   - platform: status_led
     name: ${friendly_name} status
     pin:
       number: P23
       inverted: true
+  - platform: binary
+    name: "LED 1"
+    output: led1
+  - platform: binary
+    name: "LED 2"
+    output: led2
+  - platform: binary
+    name: "LED 3"
+    output: led3
+  - platform: binary
+    name: "LED 4"
+    output: led4
+  - platform: binary
+    name: "LED 5"
+    output: led5
 
