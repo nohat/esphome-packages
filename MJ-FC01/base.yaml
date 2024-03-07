@@ -1,0 +1,88 @@
+esphome:
+  name: $name
+  friendly_name: $friendly_name
+  project:
+    name: Martin Jerry.FC01 Fan Controller
+    version: "1"
+
+esp8266:
+  board: esp01_1m
+
+# Enable logging
+logger:
+  level: $log_level
+  baud_rate: 0
+
+# Enable Home Assistant API
+api:
+
+ota:
+  password: "a36cc7ff477b90ab769620ffd5931366"
+
+wifi:
+  ssid: $wifi_ssid
+  password: $wifi_password
+
+  ap:
+    ssid: "$friendly_name"
+    password: "JbP6CAWsWCnr"
+
+captive_portal:
+
+web_server:
+  port: 80
+  include_internal: true
+
+button:
+  - platform: restart
+    name: Restart
+
+text_sensor:
+  - platform: debug
+    reset_reason:
+      name: Reset Reason
+  - platform: wifi_info
+    ip_address:
+      name: $friendly_name IP Address
+      icon: mdi:ip-network
+
+binary_sensor:
+  - platform: status
+    name: ${friendly_name} Status
+
+sensor:
+  - platform: uptime
+    name: ${friendly_name} Uptime
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal
+
+uart:
+  rx_pin: GPIO3
+  tx_pin: GPIO1
+  baud_rate: 9600
+
+tuya:
+
+fan:
+  - platform: tuya
+    name: None
+    switch_datapoint: 1
+    speed_datapoint: 3
+    speed_count: 4
+
+select:
+  - platform: tuya
+    name: "${friendly_name} Power On Behavior"
+    id: power_on_behavior
+    entity_category: config
+    enum_datapoint: 11
+    options:
+      0: "Off"
+      1: "On"
+      2: "Memory"
+
+switch:
+  - platform: tuya
+    name: "${friendly_name} Backlight"
+    entity_category: config
+    switch_datapoint: 13
