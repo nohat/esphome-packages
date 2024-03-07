@@ -38,9 +38,6 @@ button:
     name: Restart
 
 text_sensor:
-  - platform: debug
-    reset_reason:
-      name: Reset Reason
   - platform: wifi_info
     ip_address:
       name: $friendly_name IP Address
