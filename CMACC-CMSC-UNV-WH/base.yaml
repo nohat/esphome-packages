@@ -115,6 +115,7 @@ sensor:
 light:
   - platform: status_led
     name: ${friendly_name} status
+    id: led_status_light
     pin:
       number: P23
       inverted: true
