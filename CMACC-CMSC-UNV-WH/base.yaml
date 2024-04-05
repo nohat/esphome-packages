@@ -116,6 +116,7 @@ light:
   - platform: status_led
     name: ${friendly_name} status
     id: led_status_light
+    entity_category: diagnostic
     pin:
       number: P23
       inverted: true
