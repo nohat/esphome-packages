@@ -57,7 +57,8 @@ logger:
 api:
 
 ota:
-  password: "90a781b68f1c3f1536d09aad5af04158"
+  - platform: esphome
+    password: "90a781b68f1c3f1536d09aad5af04158"
 
 captive_portal:
 
