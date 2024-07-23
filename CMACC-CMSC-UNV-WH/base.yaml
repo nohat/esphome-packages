@@ -14,7 +14,8 @@ logger:
 api:
 
 ota:
-  password: "a36cc7ff477b90ab769620ffd5931366"
+  - platform: esphome
+    password: "a36cc7ff477b90ab769620ffd5931366"
     
 web_server:
   port: 80
