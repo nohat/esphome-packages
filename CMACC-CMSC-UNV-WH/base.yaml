@@ -36,7 +36,7 @@ wifi:
 event:
   - platform: template
     id: button_press
-    name: "Button Press"
+    name: ${friendly_name} Button Press
     event_types:
       - "button_1_pressed"
       - "button_2_pressed"
