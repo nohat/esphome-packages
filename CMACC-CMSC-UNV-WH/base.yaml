@@ -33,6 +33,17 @@ wifi:
     ssid: "$friendly_name"
     password: "JbP6CAWsWCnr"
 
+event:
+  - platform: template
+    id: button_press
+    name: "Button Press"
+    event_types:
+      - "button_1_pressed"
+      - "button_2_pressed"
+      - "button_3_pressed"
+      - "button_4_pressed"
+      - "button_5_pressed"
+
 binary_sensor:
   - platform: status
     name: ${friendly_name} Status
@@ -45,7 +56,9 @@ binary_sensor:
       inverted: true
     on_press:
       then:
-        - logger.log: "Button 1 Pressed"
+        - event.trigger: 
+            id: button_press
+            event_type: button_1_pressed
 
   - platform: gpio
     name: "Button 2"
@@ -55,7 +68,9 @@ binary_sensor:
       inverted: true
     on_press:
       then:
-        - logger.log: "Button 2 Pressed"
+        - event.trigger: 
+            id: button_press
+            event_type: button_2_pressed
 
   - platform: gpio
     name: "Button 3"
@@ -65,7 +80,9 @@ binary_sensor:
       inverted: true
     on_press:
       then:
-        - logger.log: "Button 3 Pressed"
+        - event.trigger: 
+            id: button_press
+            event_type: button_3_pressed
 
   - platform: gpio
     name: "Button 4"
@@ -75,7 +92,9 @@ binary_sensor:
       inverted: true
     on_press:
       then:
-        - logger.log: "Button 4 Pressed"
+        - event.trigger: 
+            id: button_press
+            event_type: button_4_pressed
 
   - platform: gpio
     name: "Button 5"
@@ -85,8 +104,9 @@ binary_sensor:
       inverted: true
     on_press:
       then:
-        - logger.log: "Button 5 Pressed"
-
+        - event.trigger: 
+            id: button_press
+            event_type: button_5_pressed
 button:
   - platform: restart
     name: Restart
