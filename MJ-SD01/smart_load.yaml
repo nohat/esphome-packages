@@ -290,6 +290,7 @@ output:
     power_supply: relay
     frequency: 300 Hz
     min_power: ${pwm_min_power}
+    allow_other_uses: true
 
   - id: red_led
     pin: GPIO4
@@ -340,6 +341,7 @@ output:
   - id: load_output
     platform: gpio
     pin: GPIO13
+    allow_other_uses: true
 
 light:
   - id: $device_id
