@@ -285,7 +285,9 @@ output:
     inverted: true
 
   - id: phys_pwm
-    pin: GPIO13
+    pin:
+      number: GPIO13
+      allow_other_uses: true
     platform: esp8266_pwm
     power_supply: relay
     frequency: 300 Hz
@@ -339,8 +341,9 @@ output:
 
   - id: load_output
     platform: gpio
-    pin: GPIO13
-    allow_other_uses: true
+    pin:
+      number: GPIO13
+      allow_other_uses: true
 
 light:
   - id: $device_id
