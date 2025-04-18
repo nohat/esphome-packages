@@ -244,24 +244,13 @@ number:
             transition_length: 250ms
 
 switch:
-  - platform: template
-    name: "${friendly_name} Smart Load"
+  - platform: output
+    name: "${friendly_name} Load Output"
     id: smart_load_switch
     entity_category: config
     optimistic: true
-    restore_mode: RESTORE_DEFAULT_ON
-    turn_on_action:
-      - globals.set:
-          id: smart_load
-          value: "true"
-      - output.turn_on:
-          id: load_output
-    turn_off_action:
-      - globals.set:
-          id: smart_load
-          value: "false"
-      - output.turn_off:
-          id: load_output
+    restore_mode: ALWAYS_ON
+    output: load_output
 
 output:
   - id: led5
@@ -283,15 +272,6 @@ output:
     pin: GPIO14
     platform: esp8266_pwm
     inverted: true
-
-  - id: phys_pwm
-    pin:
-      number: GPIO13
-      allow_other_uses: true
-    platform: esp8266_pwm
-    power_supply: relay
-    frequency: 300 Hz
-    min_power: ${pwm_min_power}
 
   - id: red_led
     pin: GPIO4
@@ -342,7 +322,6 @@ output:
     platform: gpio
     pin:
       number: GPIO13
-      allow_other_uses: true
 
 light:
   - id: $device_id
