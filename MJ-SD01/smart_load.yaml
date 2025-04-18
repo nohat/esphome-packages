@@ -250,22 +250,16 @@ switch:
     entity_category: config
     optimistic: true
     restore_mode: RESTORE_DEFAULT_ON
-
     turn_on_action:
       - globals.set:
           id: smart_load
           value: "true"
-      - power_supply.enable:
-          id: relay
       - output.turn_on:
           id: load_output
-
     turn_off_action:
       - globals.set:
           id: smart_load
           value: "false"
-      - power_supply.disable:
-          id: relay
       - output.turn_off:
           id: load_output
 
