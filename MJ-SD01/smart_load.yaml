@@ -243,13 +243,13 @@ number:
 switch:
   - platform: output
     name: "${friendly_name} Load Output"
-    id: smart_load_switch
+    id: smart_load_output_switch
     entity_category: config
     restore_mode: ALWAYS_ON
     output: load_output
   - platform: output
     name: "${friendly_name} Load Relay"
-    id: smart_load_switch
+    id: smart_load_relay_switch
     entity_category: config
     restore_mode: ALWAYS_ON
     output: load_relay
