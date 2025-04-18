@@ -248,7 +248,6 @@ switch:
     name: "${friendly_name} Load Output"
     id: smart_load_switch
     entity_category: config
-    optimistic: true
     restore_mode: ALWAYS_ON
     output: load_output
 
