@@ -309,14 +309,6 @@ output:
       - output.set_level:
           id: brtleds_output
           level: !lambda return(state);
-      - if:
-          condition:
-            lambda: 'return !id(smart_load);'
-          then:
-            - output.set_level:
-                id: phys_pwm
-                level: !lambda return(gamma_correct(state, ${gamma_correct}));
-
   - id: load_output
     platform: gpio
     pin:
